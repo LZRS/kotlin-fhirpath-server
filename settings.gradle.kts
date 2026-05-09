@@ -1,11 +1,10 @@
-rootProject.name = "ktor-fhirpath-lab"
+rootProject.name = "kotlin-fhirpath-server"
 
 dependencyResolutionManagement {
+    @Suppress("UnstableApiUsage")
     repositories {
-        maven {
-            url = uri("file:///Users/lxrso.t/Developer/github.com/google/kotlin-fhirpath/fhir-path/build/repo")
-        }
         google()
         mavenCentral()
+        mavenLocal()
     }
 }
