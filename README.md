@@ -13,7 +13,7 @@ Here are some useful links to get you started:
 
 Here's a list of features included in this project:
 
-| Name                                                                   | Description                                                                        |
+|                                  Name                                  |                                    Description                                     |
 |------------------------------------------------------------------------|------------------------------------------------------------------------------------|
 | [CORS](https://start.ktor.io/p/cors)                                   | Enables Cross-Origin Resource Sharing (CORS)                                       |
 | [AutoHeadResponse](https://start.ktor.io/p/auto-head-response)         | Provides automatic responses for HEAD requests                                     |
@@ -28,7 +28,7 @@ Here's a list of features included in this project:
 
 To build or run the project, use one of the following tasks:
 
-| Task                                    | Description                                                          |
+|                  Task                   |                             Description                              |
 |-----------------------------------------|----------------------------------------------------------------------|
 | `./gradlew test`                        | Run the tests                                                        |
 | `./gradlew build`                       | Build everything                                                     |
