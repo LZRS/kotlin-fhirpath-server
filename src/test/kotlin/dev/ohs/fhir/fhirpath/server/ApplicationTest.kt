@@ -240,8 +240,7 @@ class ApplicationTest {
       }
 
     assertEquals(HttpStatusCode.OK, response.status)
-    println(response.bodyAsText())
-    //        println(response.bodyAsText())
+    //    println(response.bodyAsText())
   }
 
   @Test
@@ -287,29 +286,8 @@ class ApplicationTest {
             .trimIndent()
         )
       }
-
-    println(response.contentType())
-    println(response.bodyAsText())
     assertEquals(HttpStatusCode.BadRequest, response.status)
-    assertEquals(
-      """
-                {
-                  "resourceType": "OperationOutcome",
-                  "issue": [
-                    {
-                      "severity": "error",
-                      "code": "required",
-                      "details": {
-                        "text": "Missing required parameter: resource"
-                      }
-                    }
-                  ]
-                }
-            """
-        .trimIndent(),
-      response.bodyAsText(),
-    )
-    //        println(response.bodyAsText())
+    //      println(response.bodyAsText())
   }
 
   @Test

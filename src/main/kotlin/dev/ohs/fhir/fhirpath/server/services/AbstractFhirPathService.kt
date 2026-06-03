@@ -35,42 +35,41 @@ import kotlinx.serialization.json.JsonElement
  * - [Resource] — the version's base `Resource` type
  *
  * ## Minimum required overrides
- *
- * | Member | Purpose |
- * |--------|---------|
- * | [evaluatorLabel] | Human-readable label included in the `evaluator` output parameter (e.g. `"Kotlin FHIRPath (R4)"`) |
- * | [fhirpathEngine] | Version-specific [FhirPathEngine] instance (e.g. `FhirPathEngine.forR4()`) |
- * | [decodeResource] | Deserialise a JSON string into the version's [Resource] type |
- * | [buildFhirParameters] | Serialise a `Parameters` resource (with the given [Param] list) back to a JSON string |
- * | [makeStringParameter] | Construct a string-valued `Parameters.Parameter` with an optional list of child parts |
- * | [makeGroupParameter] | Construct a group `Parameters.Parameter` (no value, only child parts) |
- * | [makeResourceParameter] | Construct a resource-valued `Parameters.Parameter` |
+ * |Member                 |Purpose                                                                                          |
+ * |-----------------------|-------------------------------------------------------------------------------------------------|
+ * |[evaluatorLabel]       |Human-readable label included in the `evaluator` output parameter (e.g. `"Kotlin FHIRPath (R4)"`)|
+ * |[fhirpathEngine]       |Version-specific [FhirPathEngine] instance (e.g. `FhirPathEngine.forR4()`)                       |
+ * |[decodeResource]       |Deserialise a JSON string into the version's [Resource] type                                     |
+ * |[buildFhirParameters]  |Serialise a `Parameters` resource (with the given [Param] list) back to a JSON string            |
+ * |[makeStringParameter]  |Construct a string-valued `Parameters.Parameter` with an optional list of child parts            |
+ * |[makeGroupParameter]   |Construct a group `Parameters.Parameter` (no value, only child parts)                            |
+ * |[makeResourceParameter]|Construct a resource-valued `Parameters.Parameter`                                               |
  *
  * ## FHIRPath primitive type converters
  *
- * The engine returns its own primitive types for numeric, temporal, and scalar results.
- * Each maps to a specific FHIR parameter type; implement one method per primitive:
+ * The engine returns its own primitive types for numeric, temporal, and scalar results. Each maps
+ * to a specific FHIR parameter type; implement one method per primitive:
  *
- * | Method | Engine type | FHIR parameter type |
- * |--------|-------------|---------------------|
- * | [makeDecimalParameter] | [BigDecimal] | `decimal` |
- * | [makeQuantityParameter] | [FhirPathQuantity] | `quantity` |
- * | [makeDateTimeParameter] | [FhirPathDateTime] | `dateTime` |
- * | [makeDateParameter] | [FhirPathDate] | `date` |
- * | [makeTimeParameter] | [FhirPathTime] | `time` |
- * | [makeIntegerParameter] | [Int] | `integer` |
- * | [makeBooleanParameter] | [Boolean] | `boolean` |
- * | [makeStringValueParameter] | [String] | `string` |
+ * | Method                     | Engine type        | FHIR parameter type |
+ * |----------------------------|--------------------|---------------------|
+ * | [makeDecimalParameter]     | [BigDecimal]       | `decimal`           |
+ * | [makeQuantityParameter]    | [FhirPathQuantity] | `quantity`          |
+ * | [makeDateTimeParameter]    | [FhirPathDateTime] | `dateTime`          |
+ * | [makeDateParameter]        | [FhirPathDate]     | `date`              |
+ * | [makeTimeParameter]        | [FhirPathTime]     | `time`              |
+ * | [makeIntegerParameter]     | [Int]              | `integer`           |
+ * | [makeBooleanParameter]     | [Boolean]          | `boolean`           |
+ * | [makeStringValueParameter] | [String]           | `string`            |
  *
  * ## FHIR model type converter
  *
- * [convertFhirTypeToParameter] receives any value that is not one of the FHIRPath primitives
- * above — typically a version-specific FHIR data type (e.g. `Coding`, `Period`, `Reference`).
- * Use a `when` expression to wrap each recognised type in its corresponding
- * `Parameters.Parameter.Value` subclass. The `else` branch should fall back to a JSON
- * extension parameter using `DynamicLookupSerializer` for any unrecognised type.
+ * [convertFhirTypeToParameter] receives any value that is not one of the FHIRPath primitives above
+ * — typically a version-specific FHIR data type (e.g. `Coding`, `Period`, `Reference`). Use a
+ * `when` expression to wrap each recognised type in its corresponding `Parameters.Parameter.Value`
+ * subclass. The `else` branch should fall back to a JSON extension parameter using
+ * `DynamicLookupSerializer` for any unrecognised type.
  */
-internal abstract class AbstractFhirPathService<Param : Any, Resource: Any> : FhirPathService {
+internal abstract class AbstractFhirPathService<Param : Any, Resource : Any> : FhirPathService {
 
   /** Human-readable label emitted as the `evaluator` output parameter. */
   protected abstract val evaluatorLabel: String
@@ -111,32 +110,39 @@ internal abstract class AbstractFhirPathService<Param : Any, Resource: Any> : Fh
   /**
    * Wrap a version-specific FHIR model type as a parameter.
    *
-   * Called for any eval result that is not a FHIRPath primitive. Use a `when` expression
-   * over the version's concrete data types (e.g. `Coding`, `Period`). The `else` branch
-   * should produce a JSON extension fallback for unknown types.
+   * Called for any eval result that is not a FHIRPath primitive. Use a `when` expression over the
+   * version's concrete data types (e.g. `Coding`, `Period`). The `else` branch should produce a
+   * JSON extension fallback for unknown types.
    */
   protected abstract fun convertFhirTypeToParameter(value: Any): Param
 
   /**
    * Convert a single FHIRPath evaluation result to a [Param].
    *
-   * Dispatches FHIRPath primitive types to the dedicated `make*Parameter` methods and
-   * delegates everything else to [convertFhirTypeToParameter].
+   * Dispatches FHIRPath primitive types to the dedicated `make*Parameter` methods and delegates
+   * everything else to [convertFhirTypeToParameter].
    */
-  protected fun convertEvalResultToParameter(evalResult: Any, resourcePath: String? = null): Param = when (evalResult) {
-    is BigDecimal -> makeDecimalParameter(evalResult)
-    is FhirPathQuantity -> makeQuantityParameter(evalResult)
-    is FhirPathDateTime -> makeDateTimeParameter(evalResult)
-    is FhirPathDate -> makeDateParameter(evalResult)
-    is FhirPathTime -> makeTimeParameter(evalResult)
-    is Int -> makeIntegerParameter(evalResult)
-    is Boolean -> makeBooleanParameter(evalResult)
-    is String -> makeStringValueParameter(evalResult)
-    else -> convertFhirTypeToParameter(evalResult)
-  }
+  protected fun convertEvalResultToParameter(evalResult: Any, resourcePath: String? = null): Param =
+    when (evalResult) {
+      is BigDecimal -> makeDecimalParameter(evalResult)
+      is FhirPathQuantity -> makeQuantityParameter(evalResult)
+      is FhirPathDateTime -> makeDateTimeParameter(evalResult)
+      is FhirPathDate -> makeDateParameter(evalResult)
+      is FhirPathTime -> makeTimeParameter(evalResult)
+      is Int -> makeIntegerParameter(evalResult)
+      is Boolean -> makeBooleanParameter(evalResult)
+      is String -> makeStringValueParameter(evalResult)
+      else -> convertFhirTypeToParameter(evalResult)
+    }
 
-  /** Build a string-valued parameter named [name] with value [value], optionally with child [parts]. */
-  protected abstract fun makeStringParameter(name: String, value: String, parts: List<Param> = emptyList()): Param
+  /**
+   * Build a string-valued parameter named [name] with value [value], optionally with child [parts].
+   */
+  protected abstract fun makeStringParameter(
+    name: String,
+    value: String,
+    parts: List<Param> = emptyList(),
+  ): Param
 
   /** Build a group parameter named [name] with no value and the given child [parts]. */
   protected abstract fun makeGroupParameter(name: String, parts: List<Param>): Param
@@ -144,7 +150,9 @@ internal abstract class AbstractFhirPathService<Param : Any, Resource: Any> : Fh
   /** Build a resource-valued parameter named [name] containing [resource]. */
   protected abstract fun makeResourceParameter(name: String, resource: Resource): Param
 
-  /** Serialize a `Parameters` resource with the given [id] and top-level [params] to a JSON string. */
+  /**
+   * Serialize a `Parameters` resource with the given [id] and top-level [params] to a JSON string.
+   */
   protected abstract fun buildFhirParameters(id: String, params: List<Param>): String
 
   override suspend fun evaluate(inputData: InputData): JsonElement =
@@ -180,7 +188,8 @@ internal abstract class AbstractFhirPathService<Param : Any, Resource: Any> : Fh
               makeStringParameter(
                 name = "result",
                 value = label,
-                parts = expressionResult.map { convertEvalResultToParameter(it) } + traceParameters(),
+                parts =
+                  expressionResult.map { convertEvalResultToParameter(it) } + traceParameters(),
               )
             }
         } else {
@@ -198,23 +207,21 @@ internal abstract class AbstractFhirPathService<Param : Any, Resource: Any> : Fh
           )
         }
 
-      val metaParameters: List<Param> =
-        buildList {
-          add(makeStringParameter(name = "evaluator", value = evaluatorLabel))
-          inputData.contextExpression?.let {
-            add(makeStringParameter(name = "context", value = it))
-          }
-          add(makeStringParameter(name = "expression", value = inputData.expression))
-          add(makeResourceParameter(name = "resource", resource = resource))
-          if (inputData.variables.isNotEmpty()) {
-            add(
-              makeGroupParameter(
-                name = "variables",
-                parts = inputData.variables.map { makeStringParameter(name = it.key, value = it.value) },
-              )
+      val metaParameters: List<Param> = buildList {
+        add(makeStringParameter(name = "evaluator", value = evaluatorLabel))
+        inputData.contextExpression?.let { add(makeStringParameter(name = "context", value = it)) }
+        add(makeStringParameter(name = "expression", value = inputData.expression))
+        add(makeResourceParameter(name = "resource", resource = resource))
+        if (inputData.variables.isNotEmpty()) {
+          add(
+            makeGroupParameter(
+              name = "variables",
+              parts =
+                inputData.variables.map { makeStringParameter(name = it.key, value = it.value) },
             )
-          }
+          )
         }
+      }
 
       val parametersJsonString =
         buildFhirParameters(

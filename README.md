@@ -60,7 +60,7 @@ The server exposes three FHIRPath evaluation endpoints — one per FHIR version 
 
 **Body**: A FHIR `Parameters` resource with the following parameters:
 
-| Parameter           | Type       | Required | Description                                                                                                                                                        |
+|      Parameter      |    Type    | Required |                                                                            Description                                                                             |
 |---------------------|------------|:--------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `expression`        | string     |   Yes    | FHIRPath expression to evaluate                                                                                                                                    |
 | `resource`          | Resource   |   Yes    | FHIR resource to evaluate against                                                                                                                                  |

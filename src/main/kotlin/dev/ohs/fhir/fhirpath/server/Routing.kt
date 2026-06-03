@@ -80,10 +80,16 @@ private suspend fun RoutingContext.handleFhirPathRequest(service: FhirPathServic
     try {
       parseContentStringData(content)
     } catch (e: MissingRequiredFieldException) {
-      call.respond(HttpStatusCode.BadRequest, createOperationOutcome("error", "required", e.message ?: ""))
+      call.respond(
+        HttpStatusCode.BadRequest,
+        createOperationOutcome("error", "required", e.message ?: ""),
+      )
       return
     } catch (e: IllegalStateException) {
-      call.respond(HttpStatusCode.BadRequest, createOperationOutcome("error", "invalid", e.message ?: ""))
+      call.respond(
+        HttpStatusCode.BadRequest,
+        createOperationOutcome("error", "invalid", e.message ?: ""),
+      )
       return
     }
   try {
