@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Open Health Stack Foundation
+ * Copyright 2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,10 @@
  */
 package dev.ohs.fhir.fhirpath.server
 
-import dev.ohs.fhir.fhirpath.server.services.FhirPathR4BService
-import dev.ohs.fhir.fhirpath.server.services.FhirPathR4Service
-import dev.ohs.fhir.fhirpath.server.services.FhirPathR5Service
-import io.ktor.server.application.Application
-import io.ktor.server.plugins.di.dependencies
-
-fun Application.configureFrameworks() {
-  dependencies {
-    provide<FhirPathR4Service> { FhirPathR4Service() }
-    provide<FhirPathR4BService> { FhirPathR4BService() }
-    provide<FhirPathR5Service> { FhirPathR5Service() }
-  }
-}
+data class InputData(
+  val contextExpression: String?,
+  val expression: String,
+  val resourceStr: String,
+  val variables: Map<String, String>,
+  val terminologyServer: String?,
+)

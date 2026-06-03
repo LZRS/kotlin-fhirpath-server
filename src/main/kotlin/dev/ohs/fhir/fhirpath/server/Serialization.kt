@@ -25,7 +25,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 @OptIn(ExperimentalSerializationApi::class)
 fun Application.configureSerialization() {
   install(ContentNegotiation) {
-    jsonIo()
+    jsonIo(contentType = ContentType.Application.Json)
     jsonIo(contentType = ContentType(ContentType.Application.TYPE, "fhir+json"))
   }
 }

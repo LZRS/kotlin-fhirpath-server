@@ -34,7 +34,7 @@ class ApplicationTest {
     application { module() }
     val response = client.get("/")
     assertEquals(HttpStatusCode.OK, response.status)
-    assertTrue(response.bodyAsText().contains("FHIR Path API is running!"))
+    assertTrue(response.bodyAsText().contains("Kotlin FHIRPath server is running!"))
   }
 
   @Test
@@ -42,7 +42,7 @@ class ApplicationTest {
     application { module() }
 
     val response =
-      client.post("/fhir/\$fhirpath") {
+      client.post("/fhirpath-r4") {
         contentType(ContentType(ContentType.Application.TYPE, "fhir+json"))
         setBody(
           """
@@ -249,8 +249,8 @@ class ApplicationTest {
     application { module() }
 
     val response =
-      client.post("/fhir/\$fhirpath") {
-          contentType(ContentType(ContentType.Application.TYPE, "fhir+json"))
+      client.post("/fhirpath-r4") {
+        contentType(ContentType(ContentType.Application.TYPE, "fhir+json"))
         setBody(
           """
                 {
@@ -317,8 +317,8 @@ class ApplicationTest {
     application { module() }
 
     val response =
-      client.post("/fhir/\$fhirpath-r4b") {
-        contentType(ContentType.Application.Json)
+      client.post("/fhirpath-r4b") {
+        contentType(ContentType(ContentType.Application.TYPE, "fhir+json"))
         setBody(
           """
                 {
@@ -530,8 +530,8 @@ class ApplicationTest {
     application { module() }
 
     val response =
-      client.post("/fhir/\$fhirpath-r5") {
-        contentType(ContentType.Application.Json)
+      client.post("/fhirpath-r5") {
+        contentType(ContentType(ContentType.Application.TYPE, "fhir+json"))
         setBody(
           """
                 {

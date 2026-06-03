@@ -14,11 +14,11 @@ specification, supporting FHIR versions **R4**, **R4B**, and **R5**.
 
 Use the Gradle wrapper to build and run the server:
 
-| Task | Description |
-|------|-------------|
-| `./gradlew run` | Run the server locally |
-| `./gradlew test` | Run the test suite |
-| `./gradlew build` | Compile and assemble the project |
+|          Task           |                          Description                          |
+|-------------------------|---------------------------------------------------------------|
+| `./gradlew run`         | Run the server locally                                        |
+| `./gradlew test`        | Run the test suite                                            |
+| `./gradlew build`       | Compile and assemble the project                              |
 | `./gradlew buildFatJar` | Build a self-contained executable JAR (`fhirpath-server.jar`) |
 
 The server starts on port `8080` by default. Set the `PORT` environment variable to override:
@@ -46,13 +46,13 @@ java -jar build/libs/fhirpath-server.jar
 
 The server exposes three FHIRPath evaluation endpoints — one per FHIR version — plus a health check:
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | API overview and endpoint listing |
-| `/health` | GET | Health check with current timestamp |
-| `/fhir/$fhirpath` | POST | Evaluate a FHIRPath expression against an **R4** resource |
-| `/fhir/$fhirpath-r4b` | POST | Evaluate a FHIRPath expression against an **R4B** resource |
-| `/fhir/$fhirpath-r5` | POST | Evaluate a FHIRPath expression against an **R5** resource |
+|    Endpoint     | Method |                        Description                         |
+|-----------------|--------|------------------------------------------------------------|
+| `/`             | GET    | API overview and endpoint listing                          |
+| `/health`       | GET    | Health check with current timestamp                        |
+| `/fhirpath-r4`  | POST   | Evaluate a FHIRPath expression against an **R4** resource  |
+| `/fhirpath-r4b` | POST   | Evaluate a FHIRPath expression against an **R4B** resource |
+| `/fhirpath-r5`  | POST   | Evaluate a FHIRPath expression against an **R5** resource  |
 
 ### Request
 
@@ -60,12 +60,13 @@ The server exposes three FHIRPath evaluation endpoints — one per FHIR version 
 
 **Body**: A FHIR `Parameters` resource with the following parameters:
 
-| Parameter | Type | Required | Description |
-|-----------|------|:--------:|-------------|
-| `expression` | string | Yes | FHIRPath expression to evaluate |
-| `resource` | Resource | Yes | FHIR resource to evaluate against |
-| `context` | string | No | FHIRPath expression to set the evaluation scope |
-| `variables` | multi-part | No | Named variables passed into the expression |
+| Parameter           | Type       | Required | Description                                                                                                                                                        |
+|---------------------|------------|:--------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `expression`        | string     |   Yes    | FHIRPath expression to evaluate                                                                                                                                    |
+| `resource`          | Resource   |   Yes    | FHIR resource to evaluate against                                                                                                                                  |
+| `context`           | string     |    No    | FHIRPath expression to set the evaluation scope                                                                                                                    |
+| `variables`         | multi-part |    No    | Named variables passed into the expression                                                                                                                         |
+| `terminologyserver` | string     |    No    | ⚠️ Not supported. Defined in the [fhirpath-lab server API](https://github.com/brianpos/fhirpath-lab/blob/master/server-api.md) but ignored by this implementation. |
 
 **Example request body:**
 
@@ -102,11 +103,11 @@ Validation errors return HTTP `400` with an `OperationOutcome`. Unexpected serve
 
 The Ktor Gradle plugin provides built-in Docker support:
 
-| Task | Description |
-|------|-------------|
-| `./gradlew buildImage` | Build a Docker image from the fat JAR |
+|                  Task                   |                  Description                   |
+|-----------------------------------------|------------------------------------------------|
+| `./gradlew buildImage`                  | Build a Docker image from the fat JAR          |
 | `./gradlew publishImageToLocalRegistry` | Publish the image to the local Docker registry |
-| `./gradlew runDocker` | Build the image and run it as a container |
+| `./gradlew runDocker`                   | Build the image and run it as a container      |
 
 To run the published image manually:
 
@@ -136,7 +137,3 @@ This server implements the
 [FHIRPath Lab Server Engine API](https://github.com/brianpos/fhirpath-lab/blob/master/server-api.md).
 It is compatible with the
 [FHIRPath Lab](https://fhirpath-lab.com) UI as a configurable server-side evaluation engine.
-
-## License
-
-Apache License 2.0 — see [LICENSE](LICENSE).

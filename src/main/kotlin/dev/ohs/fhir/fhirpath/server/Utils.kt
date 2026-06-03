@@ -25,16 +25,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.serializer
-
-data class InputData(
-  val contextExpression: String?,
-  val expression: String,
-  val resource: JsonObject,
-  val variables: Map<String, String>,
-  val terminologyServer: String?,
-)
 
 class MissingRequiredFieldException(message: String) : SerializationException(message = message)
 

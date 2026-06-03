@@ -18,6 +18,6 @@ package dev.ohs.fhir.fhirpath.server.services
 import dev.ohs.fhir.fhirpath.server.InputData
 import kotlinx.serialization.json.JsonElement
 
-interface FhirpathService {
+interface FhirPathService {
   suspend fun evaluate(inputData: InputData): JsonElement
 }

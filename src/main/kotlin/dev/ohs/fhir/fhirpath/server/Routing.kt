@@ -15,9 +15,10 @@
  */
 package dev.ohs.fhir.fhirpath.server
 
-import dev.ohs.fhir.fhirpath.server.services.FhirR4Service
-import dev.ohs.fhir.fhirpath.server.services.FhirR4bService
-import dev.ohs.fhir.fhirpath.server.services.FhirR5Service
+import dev.ohs.fhir.fhirpath.server.services.FhirPathR4BService
+import dev.ohs.fhir.fhirpath.server.services.FhirPathR4Service
+import dev.ohs.fhir.fhirpath.server.services.FhirPathR5Service
+import dev.ohs.fhir.fhirpath.server.services.FhirPathService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -26,9 +27,9 @@ import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
-import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import kotlin.time.Clock
 import kotlinx.coroutines.Dispatchers
@@ -49,14 +50,14 @@ fun Application.configureRouting() {
     get("/") {
       call.respond(
         buildJsonObject {
-          put("message", "FHIR Path API is running!")
+          put("message", "Kotlin FHIRPath server is running!")
           put(
             "endpoints",
             buildJsonObject {
               put("/health", "GET - Health check")
-              put("/fhir/\$fhirpath", "POST - Evaluate R4 FHIRPath expressions")
-              put("/fhir/\$fhirpath-r4b", "POST - Evaluate R4B FHIRPath expressions")
-              put("/fhir/\$fhirpath-r5", "POST - Evaluate R5 FHIRPath expressions")
+              put("/fhirpath-r4", "POST - Evaluate R4 FHIRPath expressions")
+              put("/fhirpath-r4b", "POST - Evaluate R4B FHIRPath expressions")
+              put("/fhirpath-r5", "POST - Evaluate R5 FHIRPath expressions")
             },
           )
         }
@@ -67,80 +68,31 @@ fun Application.configureRouting() {
       call.respond(mapOf("status" to "healthy", "timestamp" to Clock.System.now().toString()))
     }
 
-    route("/fhir") {
-      post("/\$fhirpath") {
-        val content = call.receive<JsonObject>()
-        val inputData =
-          try {
-            parseContentStringData(content)
-          } catch (e: MissingRequiredFieldException) {
-            val operationOutcome = createOperationOutcome("error", "required", e.message ?: "")
-            call.respond(HttpStatusCode.BadRequest, operationOutcome)
-            return@post
-          } catch (e: IllegalStateException) {
-            val operationOutcome = createOperationOutcome("error", "invalid", e.message ?: "")
-            call.respond(HttpStatusCode.BadRequest, operationOutcome)
-            return@post
-          }
+    post("/fhirpath-r4") { handleFhirPathRequest(dependencies.resolve<FhirPathR4Service>()) }
+    post("/fhirpath-r4b") { handleFhirPathRequest(dependencies.resolve<FhirPathR4BService>()) }
+    post("/fhirpath-r5") { handleFhirPathRequest(dependencies.resolve<FhirPathR5Service>()) }
+  }
+}
 
-        val fhirpathR4Service = dependencies.resolve<FhirR4Service>()
-        try {
-          call.respond(HttpStatusCode.OK, fhirpathR4Service.evaluate(inputData))
-        } catch (e: Exception) {
-          val operationOutcome =
-            createOperationOutcome("error", "exception", "Internal server error: ${e.message}")
-          call.respond(HttpStatusCode.InternalServerError, operationOutcome)
-        }
-      }
-      post("/\$fhirpath-r4b") {
-        val content = call.receive<JsonObject>()
-        val inputData =
-          try {
-            parseContentStringData(content)
-          } catch (e: MissingRequiredFieldException) {
-            val operationOutcome = createOperationOutcome("error", "required", e.message ?: "")
-            call.respond(HttpStatusCode.BadRequest, operationOutcome)
-            return@post
-          } catch (e: IllegalStateException) {
-            val operationOutcome = createOperationOutcome("error", "invalid", e.message ?: "")
-            call.respond(HttpStatusCode.BadRequest, operationOutcome)
-            return@post
-          }
-
-        val fhirpathR4bService = dependencies.resolve<FhirR4bService>()
-        try {
-          call.respond(HttpStatusCode.OK, fhirpathR4bService.evaluate(inputData))
-        } catch (e: Exception) {
-          val operationOutcome =
-            createOperationOutcome("error", "exception", "Internal server error: ${e.message}")
-          call.respond(HttpStatusCode.InternalServerError, operationOutcome)
-        }
-      }
-      post("/\$fhirpath-r5") {
-        val content = call.receive<JsonObject>()
-        val inputData =
-          try {
-            parseContentStringData(content)
-          } catch (e: MissingRequiredFieldException) {
-            val operationOutcome = createOperationOutcome("error", "required", e.message ?: "")
-            call.respond(HttpStatusCode.BadRequest, operationOutcome)
-            return@post
-          } catch (e: IllegalStateException) {
-            val operationOutcome = createOperationOutcome("error", "invalid", e.message ?: "")
-            call.respond(HttpStatusCode.BadRequest, operationOutcome)
-            return@post
-          }
-
-        val fhirpathR5Service = dependencies.resolve<FhirR5Service>()
-        try {
-          call.respond(HttpStatusCode.OK, fhirpathR5Service.evaluate(inputData))
-        } catch (e: Exception) {
-          val operationOutcome =
-            createOperationOutcome("error", "exception", "Internal server error: ${e.message}")
-          call.respond(HttpStatusCode.InternalServerError, operationOutcome)
-        }
-      }
+private suspend fun RoutingContext.handleFhirPathRequest(service: FhirPathService) {
+  val content = call.receive<JsonObject>()
+  val inputData =
+    try {
+      parseContentStringData(content)
+    } catch (e: MissingRequiredFieldException) {
+      call.respond(HttpStatusCode.BadRequest, createOperationOutcome("error", "required", e.message ?: ""))
+      return
+    } catch (e: IllegalStateException) {
+      call.respond(HttpStatusCode.BadRequest, createOperationOutcome("error", "invalid", e.message ?: ""))
+      return
     }
+  try {
+    call.respond(HttpStatusCode.OK, service.evaluate(inputData))
+  } catch (e: Exception) {
+    call.respond(
+      HttpStatusCode.InternalServerError,
+      createOperationOutcome("error", "exception", "Internal server error: ${e.message}"),
+    )
   }
 }
 
@@ -176,11 +128,12 @@ private suspend fun parseContentStringData(contentJSObject: JsonObject): InputDa
           variableJsonObject["name"]!!.jsonPrimitive.content to
             variableJsonObject["valueString"]!!.jsonPrimitive.content
         } ?: emptyMap()
-    val resource =
+    val resourceString =
       try {
         inputParameters
           .single { it["name"]?.jsonPrimitive?.content == "resource" }["resource"]!!
           .jsonObject
+          .toString()
       } catch (_: NoSuchElementException) {
         throw MissingRequiredFieldException("Missing required parameter: resource")
       }
@@ -190,7 +143,7 @@ private suspend fun parseContentStringData(contentJSObject: JsonObject): InputDa
         ?.get("valueString")
         ?.jsonPrimitive
         ?.content
-    InputData(contextStr, expressionStr, resource, variables, terminologyServer)
+    InputData(contextStr, expressionStr, resourceString, variables, terminologyServer)
   }
 
 private fun createOperationOutcome(severity: String, code: String, message: String): JsonObject {
