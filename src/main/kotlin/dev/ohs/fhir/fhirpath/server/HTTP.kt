@@ -33,6 +33,6 @@ fun Application.configureHTTP() {
     allowHost("fhirpath-lab.com")
     allowHost("dev.fhirpath-lab.com")
     allowHost("azurewebsites.net", subDomains = listOf("fhirpath-lab", "fhirpath-lab-dev"))
-    allowHost("localhost:3000")
+    allowHost("localhost:3000") // allow local dev server for testing
   }
 }

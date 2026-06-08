@@ -80,10 +80,11 @@ import dev.ohs.fhir.model.r5.UsageContext
 import dev.ohs.fhir.model.r5.Uuid
 import kotlinx.serialization.ExperimentalSerializationApi
 
-internal class FhirPathR5Service : AbstractFhirPathService<Parameters.Parameter, Resource>() {
+internal class FhirPathR5Service : FhirPathService<Parameters.Parameter, Resource>() {
   override val evaluatorLabel = "Kotlin FHIRPath (R5)"
-  override val fhirpathEngine = FhirPathEngine.forR5()
   private val resourceParser = FhirR5Json()
+
+  override fun getFhirPathEngine() = FhirPathEngine.forR5()
 
   override fun decodeResource(jsonString: String) = resourceParser.decodeFromString(jsonString)
 
@@ -91,9 +92,9 @@ internal class FhirPathR5Service : AbstractFhirPathService<Parameters.Parameter,
     resourceParser.encodeToString(Parameters(id = id, parameter = params))
 
   override fun makeStringParameter(
-    name: String,
-    value: String,
-    parts: List<Parameters.Parameter>,
+      name: String,
+      value: String?,
+      parts: List<Parameters.Parameter>,
   ): Parameters.Parameter =
     if (parts.isEmpty())
       Parameters.Parameter(

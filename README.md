@@ -58,15 +58,17 @@ The server exposes three FHIRPath evaluation endpoints — one per FHIR version 
 
 **Content-Type**: `application/fhir+json` or `application/json`
 
-**Body**: A FHIR `Parameters` resource with the following parameters:
+**Body**: A FHIR `Parameters` resource. See the
+[input parameters definition](https://github.com/brianpos/fhirpath-lab/blob/master/server-api.md#input-parameters-resource)
+for the full parameter specification. Support status in this implementation:
 
-|      Parameter      |    Type    | Required |                                                                            Description                                                                             |
-|---------------------|------------|:--------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `expression`        | string     |   Yes    | FHIRPath expression to evaluate                                                                                                                                    |
-| `resource`          | Resource   |   Yes    | FHIR resource to evaluate against                                                                                                                                  |
-| `context`           | string     |    No    | FHIRPath expression to set the evaluation scope                                                                                                                    |
-| `variables`         | multi-part |    No    | Named variables passed into the expression                                                                                                                         |
-| `terminologyserver` | string     |    No    | ⚠️ Not supported. Defined in the [fhirpath-lab server API](https://github.com/brianpos/fhirpath-lab/blob/master/server-api.md) but ignored by this implementation. |
+| Parameter           | Supported |
+|---------------------|:---------:|
+| `expression`        |     ✅     |
+| `resource`          |     ✅     |
+| `context`           |     ✅     |
+| `variables`         |     ✅     |
+| `terminologyserver` |     ❌     |
 
 **Example request body:**
 
@@ -99,9 +101,100 @@ Validation errors return HTTP `400` with an `OperationOutcome`. Unexpected serve
 
 ## Deployment
 
-### Docker
+The server is deployed to a **Google Cloud Compute Engine** VM. Deployment is currently manual —
+there is no CI/CD pipeline.
 
-The Ktor Gradle plugin provides built-in Docker support:
+### What you need before deploying
+
+- Access to the GCP project with appropriate IAM permissions (Compute Instance Admin is sufficient
+  for deployments)
+- [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) installed and authenticated:
+
+  ```bash
+  gcloud auth login
+  gcloud config set project <PROJECT_ID>
+  ```
+
+- Java 21 installed on the VM. If not present, connect to the VM and install it:
+
+  ```bash
+  gcloud compute ssh <INSTANCE_NAME> --zone <ZONE>
+  # on the VM:
+  sudo apt-get install -y temurin-21-jdk
+  ```
+
+### Build
+
+Build the self-contained fat JAR locally:
+
+```bash
+./gradlew buildFatJar
+# produces build/libs/fhirpath-server.jar
+```
+
+### Copy to the VM
+
+```bash
+gcloud compute scp build/libs/fhirpath-server.jar <INSTANCE_NAME>:~/fhirpath-server.jar --zone <ZONE>
+```
+
+### Run on the VM
+
+Connect and start the server:
+
+```bash
+gcloud compute ssh <INSTANCE_NAME> --zone <ZONE>
+# on the VM:
+java -jar ~/fhirpath-server.jar
+```
+
+The `PORT` environment variable controls which port the server binds to (default `8080`). Make sure
+the VM's firewall allows inbound traffic on that port.
+
+### Running as a system service
+
+To keep the server running after disconnecting and have it restart automatically on VM reboot, create
+a systemd unit:
+
+```bash
+sudo tee /etc/systemd/system/fhirpath-server.service > /dev/null <<EOF
+[Unit]
+Description=Kotlin FHIRPath Server
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/java -jar /home/<VM_USER>/fhirpath-server.jar
+Restart=always
+Environment=PORT=8080
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable fhirpath-server
+sudo systemctl start fhirpath-server
+```
+
+Check service status with `sudo systemctl status fhirpath-server` and logs with
+`sudo journalctl -u fhirpath-server -f`.
+
+### Deploying an update
+
+```bash
+# 1. Build locally
+./gradlew buildFatJar
+
+# 2. Copy to VM
+gcloud compute scp build/libs/fhirpath-server.jar <INSTANCE_NAME>:~/fhirpath-server.jar --zone <ZONE>
+
+# 3. Restart the service
+gcloud compute ssh <INSTANCE_NAME> --zone <ZONE> --command "sudo systemctl restart fhirpath-server"
+```
+
+### Docker (local / experimental)
+
+The Ktor Gradle plugin also provides Docker tasks for local experimentation:
 
 |                  Task                   |                  Description                   |
 |-----------------------------------------|------------------------------------------------|
@@ -109,31 +202,15 @@ The Ktor Gradle plugin provides built-in Docker support:
 | `./gradlew publishImageToLocalRegistry` | Publish the image to the local Docker registry |
 | `./gradlew runDocker`                   | Build the image and run it as a container      |
 
-To run the published image manually:
-
 ```bash
-docker run -p 8080:8080 kotlin-fhirpath-server:0.0.1
+docker run -p 8080:8080 kotlin-fhirpath-server:1.0.0
 ```
-
-Override the port via the `PORT` environment variable:
-
-```bash
-docker run -e PORT=9090 -p 9090:9090 kotlin-fhirpath-server:0.0.1
-```
-
-### Deploying the fat JAR
-
-Copy `build/libs/fhirpath-server.jar` to any host with Java 21 and run:
-
-```bash
-java -jar fhirpath-server.jar
-```
-
-The server does not require any external dependencies or database — all state is in-process.
 
 ## Specification
 
 This server implements the
 [FHIRPath Lab Server Engine API](https://github.com/brianpos/fhirpath-lab/blob/master/server-api.md).
-It is compatible with the
-[FHIRPath Lab](https://fhirpath-lab.com) UI as a configurable server-side evaluation engine.
+
+Once deployed, you can point [FHIRPath Lab](https://fhirpath-lab.com) to this server as its
+evaluation engine. In FHIRPath Lab, open **Settings → Engine** and enter the base URL of your
+deployed instance (e.g. `http://<INSTANCE_IP>:8080`).

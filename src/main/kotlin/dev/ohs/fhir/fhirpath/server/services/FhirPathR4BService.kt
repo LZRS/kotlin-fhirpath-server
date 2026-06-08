@@ -81,10 +81,12 @@ import dev.ohs.fhir.model.r4b.UsageContext
 import dev.ohs.fhir.model.r4b.Uuid
 import kotlinx.serialization.ExperimentalSerializationApi
 
-internal class FhirPathR4BService : AbstractFhirPathService<Parameters.Parameter, Resource>() {
+internal class FhirPathR4BService : FhirPathService<Parameters.Parameter, Resource>() {
   override val evaluatorLabel = "Kotlin FHIRPath (R4B)"
-  override val fhirpathEngine = FhirPathEngine.forR4B()
+
   private val resourceParser = FhirR4bJson()
+
+  override fun getFhirPathEngine() = FhirPathEngine.forR4B()
 
   override fun decodeResource(jsonString: String) = resourceParser.decodeFromString(jsonString)
 
@@ -92,9 +94,9 @@ internal class FhirPathR4BService : AbstractFhirPathService<Parameters.Parameter
     resourceParser.encodeToString(Parameters(id = id, parameter = params))
 
   override fun makeStringParameter(
-    name: String,
-    value: String,
-    parts: List<Parameters.Parameter>,
+      name: String,
+      value: String?,
+      parts: List<Parameters.Parameter>,
   ): Parameters.Parameter =
     if (parts.isEmpty())
       Parameters.Parameter(

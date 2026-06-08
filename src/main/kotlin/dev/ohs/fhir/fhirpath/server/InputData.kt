@@ -19,6 +19,6 @@ data class InputData(
   val contextExpression: String?,
   val expression: String,
   val resourceStr: String,
-  val variables: Map<String, String>,
+  val variables: Map<String, String?>,
   val terminologyServer: String?,
 )
