@@ -39,7 +39,7 @@ import kotlinx.serialization.json.JsonElement
  * |Member                 |Purpose                                                                                          |
  * |-----------------------|-------------------------------------------------------------------------------------------------|
  * |[evaluatorLabel]       |Human-readable label included in the `evaluator` output parameter (e.g. `"Kotlin FHIRPath (R4)"`)|
- * |[getFhirPathEngine]    |Get Version-specific [FhirPathEngine] instance (e.g. `FhirPathEngine.forR4()`)                       |
+ * |[getFhirPathEngine]    |Get Version-specific [FhirPathEngine] instance (e.g. `FhirPathEngine.forR4()`)                   |
  * |[decodeResource]       |Deserialise a JSON string into the version's [Resource] type                                     |
  * |[buildFhirParameters]  |Serialise a `Parameters` resource (with the given [Param] list) back to a JSON string            |
  * |[makeStringParameter]  |Construct a string-valued `Parameters.Parameter` with an optional list of child parts            |
@@ -70,7 +70,7 @@ import kotlinx.serialization.json.JsonElement
  * subclass. The `else` branch should fall back to a JSON extension parameter using
  * `DynamicLookupSerializer` for any unrecognised type.
  */
-internal abstract class FhirPathService<Param : Any, Resource : Any>  {
+internal abstract class FhirPathService<Param : Any, Resource : Any> {
 
   /** Human-readable label emitted as the `evaluator` output parameter. */
   protected abstract val evaluatorLabel: String
@@ -80,6 +80,7 @@ internal abstract class FhirPathService<Param : Any, Resource : Any>  {
 
   /** Get Version-specific FHIRPath evaluation engine. */
   protected abstract fun getFhirPathEngine(): FhirPathEngine
+
   /** Deserialize [jsonString] into this version's [Resource] type. */
   protected abstract fun decodeResource(jsonString: String): Resource
 
@@ -155,15 +156,16 @@ internal abstract class FhirPathService<Param : Any, Resource : Any>  {
    */
   protected abstract fun buildFhirParameters(id: String, params: List<Param>): String
 
-  private fun buildTracingParameters(traces: Map<String, List<TraceEntry>>) = traces.map { entry ->
-    makeStringParameter(
-      name = "trace",
-      value = entry.key,
-      parts = entry.value.map { convertEvalResultToParameter(it.value) },
-    )
-  }
+  private fun buildTracingParameters(traces: Map<String, List<TraceEntry>>) =
+    traces.map { entry ->
+      makeStringParameter(
+        name = "trace",
+        value = entry.key,
+        parts = entry.value.map { convertEvalResultToParameter(it.value) },
+      )
+    }
 
-   suspend fun evaluate(inputData: InputData): JsonElement =
+  suspend fun evaluate(inputData: InputData): JsonElement =
     withContext(Dispatchers.Default) {
       val fhirpathEngine = getFhirPathEngine()
       val resource = decodeResource(inputData.resourceStr)
@@ -189,7 +191,8 @@ internal abstract class FhirPathService<Param : Any, Resource : Any>  {
                 name = "result",
                 value = label,
                 parts =
-                  expressionResult.map { convertEvalResultToParameter(it) } + buildTracingParameters(fhirpathEngine.traces),
+                  expressionResult.map { convertEvalResultToParameter(it) } +
+                    buildTracingParameters(fhirpathEngine.traces),
               )
             }
         } else {
@@ -202,7 +205,9 @@ internal abstract class FhirPathService<Param : Any, Resource : Any>  {
           listOf(
             makeGroupParameter(
               name = "result",
-              parts = expressionResult.map { convertEvalResultToParameter(it) } + buildTracingParameters(fhirpathEngine.traces),
+              parts =
+                expressionResult.map { convertEvalResultToParameter(it) } +
+                  buildTracingParameters(fhirpathEngine.traces),
             )
           )
         }

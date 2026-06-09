@@ -94,9 +94,9 @@ internal class FhirPathR4BService : FhirPathService<Parameters.Parameter, Resour
     resourceParser.encodeToString(Parameters(id = id, parameter = params))
 
   override fun makeStringParameter(
-      name: String,
-      value: String?,
-      parts: List<Parameters.Parameter>,
+    name: String,
+    value: String?,
+    parts: List<Parameters.Parameter>,
   ): Parameters.Parameter =
     if (parts.isEmpty())
       Parameters.Parameter(

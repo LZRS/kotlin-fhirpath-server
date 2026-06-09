@@ -30,7 +30,7 @@ The server exposes three FHIRPath evaluation endpoints — one per FHIR version 
 [input parameters definition](https://github.com/brianpos/fhirpath-lab/blob/master/server-api.md#input-parameters-resource)
 for the full parameter specification. Support status in this implementation:
 
-| Parameter           | Supported |
+|      Parameter      | Supported |
 |---------------------|:---------:|
 | `expression`        |     ✅     |
 | `resource`          |     ✅     |

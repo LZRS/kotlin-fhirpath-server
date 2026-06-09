@@ -73,7 +73,10 @@ fun Application.configureRouting() {
   }
 }
 
-private suspend fun parseAndEvaluateFhirPath(routingCall: RoutingCall, evaluate: suspend (InputData) -> JsonElement) {
+private suspend fun parseAndEvaluateFhirPath(
+  routingCall: RoutingCall,
+  evaluate: suspend (InputData) -> JsonElement,
+) {
   val content = routingCall.receive<JsonObject>()
   val inputData =
     try {
@@ -105,8 +108,8 @@ private suspend fun parseAndEvaluateFhirPath(routingCall: RoutingCall, evaluate:
 /**
  * Parses a FHIR [Parameters](https://www.hl7.org/fhir/parameters.html) resource into [InputData].
  *
- * Required parameters: `expression`, `resource`.
- * Optional parameters: `context`, `variables`, `terminologyserver`.
+ * Required parameters: `expression`, `resource`. Optional parameters: `context`, `variables`,
+ * `terminologyserver`.
  *
  * Example input:
  * ```json
@@ -135,7 +138,9 @@ private suspend fun parseContentStringData(contentJSObject: JsonObject): InputDa
     if (contentJSObject["resourceType"]?.jsonPrimitive?.content != "Parameters") {
       throw IllegalStateException("Expected FHIR Parameters resource")
     }
-    val inputParameters = contentJSObject["parameter"]?.jsonArray?.map { it.jsonObject } ?: throw MissingRequiredFieldException("Missing required field: 'parameter'")
+    val inputParameters =
+      contentJSObject["parameter"]?.jsonArray?.map { it.jsonObject }
+        ?: throw MissingRequiredFieldException("Missing required field: 'parameter'")
 
     val contextStr =
       inputParameters
@@ -143,10 +148,12 @@ private suspend fun parseContentStringData(contentJSObject: JsonObject): InputDa
         ?.get("valueString")
         ?.jsonPrimitive
         ?.content
-    val expressionStr = inputParameters
-        .singleOrNull { it["name"]?.jsonPrimitive?.content == "expression" }?.get("valueString")
-      ?.jsonPrimitive
-      ?.content ?: throw MissingRequiredFieldException("Missing required parameter: 'expression'")
+    val expressionStr =
+      inputParameters
+        .singleOrNull { it["name"]?.jsonPrimitive?.content == "expression" }
+        ?.get("valueString")
+        ?.jsonPrimitive
+        ?.content ?: throw MissingRequiredFieldException("Missing required parameter: 'expression'")
     val variables =
       inputParameters
         .singleOrNull { it["name"]?.jsonPrimitive?.content == "variables" }
@@ -154,14 +161,18 @@ private suspend fun parseContentStringData(contentJSObject: JsonObject): InputDa
         ?.jsonArray
         ?.associate {
           val variableJsonObject = it.jsonObject
-          val variableName = variableJsonObject["name"]?.jsonPrimitive?.content ?: throw MissingRequiredFieldException("Missing required parameter: 'part.name'")
-          variableName to
-            variableJsonObject["valueString"]?.jsonPrimitive?.content
+          val variableName =
+            variableJsonObject["name"]?.jsonPrimitive?.content
+              ?: throw MissingRequiredFieldException("Missing required parameter: 'part.name'")
+          variableName to variableJsonObject["valueString"]?.jsonPrimitive?.content
         } ?: emptyMap()
-    val resourceString = inputParameters
-        .singleOrNull { it["name"]?.jsonPrimitive?.content == "resource" }?.get("resource")
-      ?.jsonObject
-      ?.toString() ?: throw MissingRequiredFieldException("Missing required parameter: 'resource'")
+    val resourceString =
+      inputParameters
+        .singleOrNull { it["name"]?.jsonPrimitive?.content == "resource" }
+        ?.get("resource")
+        ?.jsonObject
+        ?.toString()
+        ?: throw MissingRequiredFieldException("Missing required parameter: 'resource'")
 
     val terminologyServer =
       inputParameters
