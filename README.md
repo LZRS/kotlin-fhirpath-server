@@ -14,13 +14,16 @@ specification, supporting FHIR versions **R4**, **R4B**, and **R5**.
 
 The server exposes three FHIRPath evaluation endpoints — one per FHIR version — plus a health check:
 
-|    Endpoint     | Method |                        Description                         |
-|-----------------|--------|------------------------------------------------------------|
-| `/`             | GET    | API overview and endpoint listing                          |
-| `/health`       | GET    | Health check with current timestamp                        |
-| `/fhirpath-r4`  | POST   | Evaluate a FHIRPath expression against an **R4** resource  |
-| `/fhirpath-r4b` | POST   | Evaluate a FHIRPath expression against an **R4B** resource |
-| `/fhirpath-r5`  | POST   | Evaluate a FHIRPath expression against an **R5** resource  |
+|            Endpoint            | Method |                                 Description                                 |
+|--------------------------------|--------|-----------------------------------------------------------------------------|
+| `/`                            | GET    | API overview and endpoint listing                                           |
+| `/health`                      | GET    | Health check with current timestamp                                         |
+| `/kotlin-fhirpath-config.json` | GET    | [FHIRPath Lab custom engine configuration][custom-config] for local testing |
+| `/fhirpath-r4`                 | POST   | Evaluate a FHIRPath expression against an **R4** resource                   |
+| `/fhirpath-r4b`                | POST   | Evaluate a FHIRPath expression against an **R4B** resource                  |
+| `/fhirpath-r5`                 | POST   | Evaluate a FHIRPath expression against an **R5** resource                   |
+
+[custom-config]: https://github.com/brianpos/fhirpath-lab/blob/develop/docs/custom-configuration.md
 
 ### Request
 

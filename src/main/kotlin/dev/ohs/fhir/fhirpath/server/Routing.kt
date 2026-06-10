@@ -25,10 +25,12 @@ import io.ktor.server.plugins.autohead.AutoHeadResponse
 import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondFile
 import io.ktor.server.routing.RoutingCall
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
+import java.io.File
 import kotlin.time.Clock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -54,6 +56,7 @@ fun Application.configureRouting() {
             "endpoints",
             buildJsonObject {
               put("/health", "GET - Health check")
+              put("/kotlin-fhirpath-config.json", "GET - FHIRPath Lab custom engine configuration")
               put("/fhirpath-r4", "POST - Evaluate R4 FHIRPath expressions")
               put("/fhirpath-r4b", "POST - Evaluate R4B FHIRPath expressions")
               put("/fhirpath-r5", "POST - Evaluate R5 FHIRPath expressions")
@@ -66,6 +69,9 @@ fun Application.configureRouting() {
     get("/health") {
       call.respond(mapOf("status" to "healthy", "timestamp" to Clock.System.now().toString()))
     }
+    // FHIRPath Lab custom engine config for local testing — use via the `?config=` query parameter.
+    // See: https://github.com/brianpos/fhirpath-lab/blob/develop/docs/custom-configuration.md
+    get("/kotlin-fhirpath-config.json") { call.respondFile(File("kotlin-fhirpath-config.json")) }
 
     post("/fhirpath-r4") { parseAndEvaluateFhirPath(call) { FhirPathR4Service().evaluate(it) } }
     post("/fhirpath-r4b") { parseAndEvaluateFhirPath(call) { FhirPathR4BService().evaluate(it) } }
