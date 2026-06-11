@@ -25,7 +25,8 @@
       "description": "A Kotlin implementation of FHIRPath for FHIR R5 by Open Health Stack.",
       "external": true,
       "supportsAST": false,
-      "supportsXML": false
+      "supportsXML": false,
+      "earlyAdopter": true
     }
   },
   "enabledEngines": ["fhirpath.js", "fhirpath.js (R5)", "Kotlin FHIRPath R4 (Open Health Stack)", "Kotlin FHIRPath R5 (Open Health Stack)"],
