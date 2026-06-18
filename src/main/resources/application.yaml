@@ -1,0 +1,6 @@
+ktor:
+  application:
+    modules:
+      - dev.ohs.fhir.fhirpath.server.ApplicationKt.module
+  deployment:
+    port: "$PORT:8080"

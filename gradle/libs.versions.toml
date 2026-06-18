@@ -1,0 +1,30 @@
+[versions]
+fhirModel = "1.0.0-beta03"
+fhirPath = "1.0.0-beta03"
+junit5 = "5.11.4"
+kotlin = "2.3.0"
+ktor = "3.4.2"
+logback = "1.4.14"
+spotless = "7.0.1"
+
+[libraries]
+fhir-model = { module = "dev.ohs.fhir:fhir-model-jvm", version.ref = "fhirModel" }
+fhir-path = { module = "dev.ohs.fhir:fhir-path-jvm", version.ref = "fhirPath" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit5" }
+kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json" }
+ktor-server-auto-head-response = { module = "io.ktor:ktor-server-auto-head-response" }
+ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation" }
+ktor-server-core = { module = "io.ktor:ktor-server-core" }
+ktor-server-cors = { module = "io.ktor:ktor-server-cors" }
+ktor-server-double-receive = { module = "io.ktor:ktor-server-double-receive" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty" }
+ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validation" }
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
