@@ -23,10 +23,11 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 class FhirPathRoutingTest {
 
@@ -231,12 +232,13 @@ class FhirPathRoutingTest {
     assertTrue(response.bodyAsText().contains("Kotlin FHIRPath server is running!"))
   }
 
-  @Test
-  fun r4EndpointReturnsFhirParameters() = testApplication {
+  @ParameterizedTest
+  @ValueSource(strings = ["/fhirpath-r4", "/fhirpath-r4b", "/fhirpath-r5"])
+  fun endpointReturnsFhirParameters(endpoint: String) = testApplication {
     application { module() }
 
     val response =
-      client.post("/fhirpath-r4") {
+      client.post(endpoint) {
         contentType(ContentType(ContentType.Application.TYPE, "fhir+json"))
         setBody(requestBodyJson)
       }
@@ -247,37 +249,38 @@ class FhirPathRoutingTest {
     assertTrue(body.contains(""""id":"fhirpath""""))
   }
 
-  @Test
-  fun r4bEndpointReturnsFhirParameters() = testApplication {
+  @ParameterizedTest
+  @ValueSource(strings = ["/fhirpath-r4", "/fhirpath-r4b", "/fhirpath-r5"])
+  fun timeExpressionWithFractionalSecondsIsEvaluated(endpoint: String) = testApplication {
     application { module() }
 
     val response =
-      client.post("/fhirpath-r4b") {
+      client.post(endpoint) {
         contentType(ContentType(ContentType.Application.TYPE, "fhir+json"))
-        setBody(requestBodyJson)
+        setBody(
+          """
+          {
+              "resourceType": "Parameters",
+              "parameter": [
+                  {
+                      "name": "expression",
+                      "valueString": "@T14:30:00.123"
+                  },
+                  {
+                      "name": "resource",
+                      "resource": {
+                          "resourceType": "Patient"
+                      }
+                  }
+              ]
+          }
+          """
+            .trimIndent()
+        )
       }
 
     assertEquals(HttpStatusCode.OK, response.status)
     val body = response.bodyAsText()
-    assertTrue(body.contains(""""resourceType":"Parameters""""))
-    assertTrue(body.contains(""""id":"fhirpath""""))
-  }
-
-  @Test
-  @Ignore // Fixme: StackOverflowError in R5 evaluator:
-  // https://github.com/ohs-foundation/kotlin-fhirpath/issues/75
-  fun r5EndpointReturnsFhirParameters() = testApplication {
-    application { module() }
-
-    val response =
-      client.post("/fhirpath-r5") {
-        contentType(ContentType(ContentType.Application.TYPE, "fhir+json"))
-        setBody(requestBodyJson)
-      }
-
-    assertEquals(HttpStatusCode.OK, response.status)
-    val body = response.bodyAsText()
-    assertTrue(body.contains(""""resourceType":"Parameters""""))
-    assertTrue(body.contains(""""id":"fhirpath""""))
+    assertTrue(body.contains(""""valueTime":"14:30:00.123""""))
   }
 }
