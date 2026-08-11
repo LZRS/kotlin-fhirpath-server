@@ -52,6 +52,7 @@ fun Application.configureRouting() {
       call.respond(
         buildJsonObject {
           put("message", "Kotlin FHIRPath server is running!")
+          put("version", AppVersion.current)
           put(
             "endpoints",
             buildJsonObject {

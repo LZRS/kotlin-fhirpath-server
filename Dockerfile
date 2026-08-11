@@ -4,6 +4,10 @@ COPY gradle gradle
 COPY gradlew settings.gradle.kts build.gradle.kts gradle.properties ./
 RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
 COPY src src
+# `git describe` (used by build.gradle.kts to derive the app version) needs the git executable and
+# history, neither of which belong in the runtime image below.
+RUN apk add --no-cache git
+COPY .git .git
 RUN ./gradlew buildFatJar --no-daemon
 
 FROM eclipse-temurin:21-jre-alpine

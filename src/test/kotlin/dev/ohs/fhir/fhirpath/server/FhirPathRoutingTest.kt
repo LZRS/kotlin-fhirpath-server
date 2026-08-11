@@ -229,7 +229,9 @@ class FhirPathRoutingTest {
     application { module() }
     val response = client.get("/")
     assertEquals(HttpStatusCode.OK, response.status)
-    assertTrue(response.bodyAsText().contains("Kotlin FHIRPath server is running!"))
+    val body = response.bodyAsText()
+    assertTrue(body.contains("Kotlin FHIRPath server is running!"))
+    assertTrue(body.contains(""""version":""""))
   }
 
   @ParameterizedTest
