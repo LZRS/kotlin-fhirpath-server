@@ -16,7 +16,7 @@ The server exposes three FHIRPath evaluation endpoints — one per FHIR version 
 
 |            Endpoint            | Method |                                 Description                                 |
 |--------------------------------|--------|-----------------------------------------------------------------------------|
-| `/`                            | GET    | API overview and endpoint listing                                           |
+| `/`                            | GET    | API overview, endpoint listing, and server version                          |
 | `/health`                      | GET    | Health check with current timestamp                                         |
 | `/kotlin-fhirpath-config.json` | GET    | [FHIRPath Lab custom engine configuration][custom-config] for local testing |
 | `/fhirpath-r4`                 | POST   | Evaluate a FHIRPath expression against an **R4** resource                   |
@@ -69,6 +69,21 @@ and debug trace information.
 
 Validation errors return HTTP `400` with an `OperationOutcome`. Unexpected server errors return HTTP
 `500` with an `OperationOutcome`.
+
+## Versioning
+
+The server's version is derived from `git describe --tags --always --dirty` at build time (see
+`build.gradle.kts`) and reported in the `/` response, so a running deployment can always be traced
+back to the release or commit it was built from:
+
+- On an exact tag (e.g. a GitHub Release tagged `v1.2.3`), the version is `1.2.3`.
+- A few commits past the last tag, it's `1.2.3-4-gabc1234` (commit count + abbreviated SHA).
+- Before the first tag exists, it falls back to the bare abbreviated commit SHA.
+- With uncommitted local changes, a `-dirty` suffix is appended.
+
+Cutting a release is a plain git tag — `git tag v1.2.3 && git push --tags` (then optionally turn it
+into a GitHub Release) — and any subsequent build, including the Docker build below, picks up the new
+version automatically.
 
 ## Deployment
 
