@@ -33,8 +33,11 @@ fun FhirPathTime.toLocalTime(): LocalTime =
   LocalTime(
     hour = this.hour,
     minute = this.minute ?: 0,
-    second = this.second?.toInt() ?: 0,
-    nanosecond = this.second?.let { s -> ((s - s.toInt()) * 1_000_000_000).toInt() } ?: 0,
+    second = this.second?.intValue(exactRequired = false) ?: 0,
+    nanosecond =
+      this.second?.let { s ->
+        ((s - s.intValue(exactRequired = false)) * 1_000_000_000).intValue(exactRequired = false)
+      } ?: 0,
   )
 
 @ExperimentalSerializationApi

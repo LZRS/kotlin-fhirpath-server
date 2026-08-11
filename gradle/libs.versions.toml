@@ -1,9 +1,9 @@
 [versions]
-fhirModel = "1.0.0-beta03"
-fhirPath = "1.0.0-beta03"
+fhirModel = "1.0.0-beta05"
+fhirPath = "1.0.0-beta05"
 junit5 = "5.11.4"
-kotlin = "2.3.0"
-ktor = "3.4.2"
+kotlin = "2.3.21"
+ktor = "3.5.1"
 logback = "1.4.14"
 spotless = "7.0.1"
 

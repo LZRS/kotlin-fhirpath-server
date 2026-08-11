@@ -17,6 +17,7 @@ package dev.ohs.fhir.fhirpath.server.services
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import dev.ohs.fhir.fhirpath.FhirPathEngine
+import dev.ohs.fhir.fhirpath.forR5
 import dev.ohs.fhir.fhirpath.server.DynamicLookupSerializer
 import dev.ohs.fhir.fhirpath.server.toLocalTime
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
@@ -47,7 +48,6 @@ import dev.ohs.fhir.model.r5.Expression
 import dev.ohs.fhir.model.r5.Extension
 import dev.ohs.fhir.model.r5.FhirDate
 import dev.ohs.fhir.model.r5.FhirDateTime
-import dev.ohs.fhir.model.r5.FhirR5Json
 import dev.ohs.fhir.model.r5.HumanName
 import dev.ohs.fhir.model.r5.Id
 import dev.ohs.fhir.model.r5.Identifier
@@ -79,14 +79,16 @@ import dev.ohs.fhir.model.r5.Url
 import dev.ohs.fhir.model.r5.UsageContext
 import dev.ohs.fhir.model.r5.Uuid
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
 
 internal class FhirPathR5Service : FhirPathService<Parameters.Parameter, Resource>() {
   override val evaluatorLabel = "Kotlin FHIRPath (R5)"
-  private val resourceParser = FhirR5Json()
+  private val resourceParser = Json
 
   override fun getFhirPathEngine() = FhirPathEngine.forR5()
 
-  override fun decodeResource(jsonString: String) = resourceParser.decodeFromString(jsonString)
+  override fun decodeResource(jsonString: String) =
+    resourceParser.decodeFromString<Resource>(jsonString)
 
   override fun buildFhirParameters(id: String, params: List<Parameters.Parameter>) =
     resourceParser.encodeToString(Parameters(id = id, parameter = params))
